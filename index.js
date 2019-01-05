@@ -1,6 +1,6 @@
 'use strict';
 const Alexa = require('ask-sdk-core');
-
+const Request = require('request');
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
@@ -21,6 +21,7 @@ const HelloWorldIntentHandler = {
     },
     handle(handlerInput) {
         const speechText = 'Hello World!';
+         console.log('res');
 return handlerInput.responseBuilder
             .speak(speechText)
             .withSimpleCard('Hello World', speechText)
@@ -39,28 +40,45 @@ const CalendarBasicHandler = {
         // The request did not include a token, so tell the user to link
         // accounts and return a LinkAccount card
         var speechText = "Your calendar account is not linked";        
-        
+       
         return handlerInput.responseBuilder
             .speak(speechText)
             .withLinkAccountCard()
             .getResponse();
     } else {
-
-    	// var options ={
-    	// 	url: '';
-    	// 	headers:{
-    	// 		'Authorization' : 'Bearer '+accessToken
-    	// 	},
-    	// };
-        var speechText = 'Your next event is soon';
+    	
+    	var options ={
+    		url: 'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+    		method: 'GET',
+    		headers:{
+    			'Authorization' : 'Bearer '+accessToken
+    		},
+    	}
+    	Request(options,function(error,response,body){
+    		if(error){
+    			console.log('error');
+    		}
+    		else{
+    				var info = JSON.parse(body);
+    				console.log(info);    				
+    				//console.log(info.id);
+    	// 			var speechText = 'Your next event is soon';
+    	// return handlerInput.responseBuilder
+     //        .speak(speechText)
+     //        .withSimpleCard('Hello World', speechText)
+     //        .getResponse();
+    		}
+    	});
+ 
+    	var speechText = 'Your next event is soon';
+    	//console.log('res');
 		return handlerInput.responseBuilder
             .speak(speechText)
             .withSimpleCard('Hello World', speechText)
             .getResponse();
-
-    }
-       
-    }
+    	       
+   }      
+  }
 };
 const HelpIntentHandler = {
     canHandle(handlerInput) {
@@ -120,6 +138,14 @@ exports.handler = Alexa.SkillBuilders.custom()
                          CancelAndStopIntentHandler,
                          SessionEndedRequestHandler)
      .lambda();
+
+
+
+
+
+
+
+
 
 
 
