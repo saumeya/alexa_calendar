@@ -45,41 +45,44 @@ const CalendarBasicHandler = {
             .speak(speechText)
             .withLinkAccountCard()
             .getResponse();
-    } else {
-    	
-    	var options ={
-    		url: 'https://www.googleapis.com/calendar/v3/calendars/primary/events',
-    		method: 'GET',
-    		headers:{
-    			'Authorization' : 'Bearer '+accessToken
-    		},
-    	}
-    	Request(options,function(error,response,body){
-    		if(error){
-    			console.log('error');
-    		}
-    		else{
-    				var info = JSON.parse(body);
-    				console.log(info);    				
-    				//console.log(info.id);
-    	// 			var speechText = 'Your next event is soon';
-    	// return handlerInput.responseBuilder
-     //        .speak(speechText)
-     //        .withSimpleCard('Hello World', speechText)
-     //        .getResponse();
-    		}
-    	});
- 
-    	var speechText = 'Your next event is soon';
-    	//console.log('res');
-		return handlerInput.responseBuilder
+    } 
+    else { 
+   	  return new Promise(resolve => {
+      getEmail(accessToken, res => {
+      	var event = res.items[0].summary;
+        var speechText = 'Your next events is ' + event;
+        resolve(
+          handlerInput.responseBuilder
             .speak(speechText)
-            .withSimpleCard('Hello World', speechText)
-            .getResponse();
-    	       
+            .reprompt(speechText)
+            .getResponse()
+        );
+      });
+    });      	       
    }      
   }
 };
+
+function getEmail(accessToken, callback) {
+
+  const header = {
+    headers: {'Authorization': 'Bearer ' + accessToken }
+   // 'content-type': 'application/json'
+  };
+
+  axios
+    .get('https://www.googleapis.com/calendar/v3/calendars/primary/events', header)
+    .then(response => {
+      console.log(response.data);       							
+      console.log(response.data.items[0].summary);
+      console.log(response.data.items[0].creator.email);
+       console.log(response.data.items[0].start.dateTime);
+     // var d = JSON.parse(response.data.items[0].creator)
+      //console.log(d.email);
+      callback(response.data);
+    });
+}
+	    
 const HelpIntentHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
