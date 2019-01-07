@@ -1,8 +1,12 @@
 'use strict';
 const Alexa = require('ask-sdk-core');
+<<<<<<< HEAD
 const Request = require('request-promise');
 const axios = require('axios');
 
+=======
+const Request = require('request');
+>>>>>>> c318d4cb0d7f405a75ca221fab43a888020179a3
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
@@ -49,9 +53,15 @@ const CalendarBasicHandler = {
             .getResponse();
     } 
     else { 
+<<<<<<< HEAD
       return new Promise(resolve => {
       getEmail(accessToken, res => {
         var event = res.items[0].summary;
+=======
+   	  return new Promise(resolve => {
+      getEmail(accessToken, res => {
+      	var event = res.items[0].summary;
+>>>>>>> c318d4cb0d7f405a75ca221fab43a888020179a3
         var speechText = 'Your next events is ' + event;
         resolve(
           handlerInput.responseBuilder
@@ -60,7 +70,11 @@ const CalendarBasicHandler = {
             .getResponse()
         );
       });
+<<<<<<< HEAD
     });                
+=======
+    });      	       
+>>>>>>> c318d4cb0d7f405a75ca221fab43a888020179a3
    }      
   }
 };
@@ -75,7 +89,11 @@ function getEmail(accessToken, callback) {
   axios
     .get('https://www.googleapis.com/calendar/v3/calendars/primary/events', header)
     .then(response => {
+<<<<<<< HEAD
       console.log(response.data);                                   
+=======
+      console.log(response.data);       							
+>>>>>>> c318d4cb0d7f405a75ca221fab43a888020179a3
       console.log(response.data.items[0].summary);
       console.log(response.data.items[0].creator.email);
        console.log(response.data.items[0].start.dateTime);
@@ -84,7 +102,11 @@ function getEmail(accessToken, callback) {
       callback(response.data);
     });
 }
+<<<<<<< HEAD
 
+=======
+	    
+>>>>>>> c318d4cb0d7f405a75ca221fab43a888020179a3
 const HelpIntentHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -143,3 +165,22 @@ exports.handler = Alexa.SkillBuilders.custom()
                          CancelAndStopIntentHandler,
                          SessionEndedRequestHandler)
      .lambda();
+<<<<<<< HEAD
+=======
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> c318d4cb0d7f405a75ca221fab43a888020179a3
