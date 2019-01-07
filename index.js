@@ -1,5 +1,7 @@
 'use strict';
 const Alexa = require('ask-sdk-core');
+const Request = require('request-promise');
+const axios = require('axios');
 
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
@@ -21,6 +23,7 @@ const HelloWorldIntentHandler = {
     },
     handle(handlerInput) {
         const speechText = 'Hello World!';
+         console.log('res');
 return handlerInput.responseBuilder
             .speak(speechText)
             .withSimpleCard('Hello World', speechText)
@@ -33,35 +36,55 @@ const CalendarBasicHandler = {
             && handlerInput.requestEnvelope.request.intent.name === 'CalendarBasic';
     },
     handle(handlerInput) {
-    	 var accessToken = handlerInput.requestEnvelope.context.System.user.accessToken;
-
+         var accessToken = handlerInput.requestEnvelope.context.System.user.accessToken;
+        // var result;
     if (accessToken == undefined){
         // The request did not include a token, so tell the user to link
         // accounts and return a LinkAccount card
         var speechText = "Your calendar account is not linked";        
-        
+       
         return handlerInput.responseBuilder
             .speak(speechText)
             .withLinkAccountCard()
             .getResponse();
-    } else {
-
-    	// var options ={
-    	// 	url: '';
-    	// 	headers:{
-    	// 		'Authorization' : 'Bearer '+accessToken
-    	// 	},
-    	// };
-        var speechText = 'Your next event is soon';
-		return handlerInput.responseBuilder
+    } 
+    else { 
+      return new Promise(resolve => {
+      getEmail(accessToken, res => {
+        var event = res.items[0].summary;
+        var speechText = 'Your next events is ' + event;
+        resolve(
+          handlerInput.responseBuilder
             .speak(speechText)
-            .withSimpleCard('Hello World', speechText)
-            .getResponse();
-
-    }
-       
-    }
+            .reprompt(speechText)
+            .getResponse()
+        );
+      });
+    });                
+   }      
+  }
 };
+
+function getEmail(accessToken, callback) {
+
+  const header = {
+    headers: {'Authorization': 'Bearer ' + accessToken }
+   // 'content-type': 'application/json'
+  };
+
+  axios
+    .get('https://www.googleapis.com/calendar/v3/calendars/primary/events', header)
+    .then(response => {
+      console.log(response.data);                                   
+      console.log(response.data.items[0].summary);
+      console.log(response.data.items[0].creator.email);
+       console.log(response.data.items[0].start.dateTime);
+     // var d = JSON.parse(response.data.items[0].creator)
+      //console.log(d.email);
+      callback(response.data);
+    });
+}
+
 const HelpIntentHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -120,11 +143,3 @@ exports.handler = Alexa.SkillBuilders.custom()
                          CancelAndStopIntentHandler,
                          SessionEndedRequestHandler)
      .lambda();
-
-
-
-
-
-
-
-
