@@ -51,8 +51,33 @@ const CalendarBasicHandler = {
     else { 
       return new Promise(resolve => {
       getEmail(accessToken, res => {
-        var event = res.items[0].summary;
-        var speechText = 'Your next events is ' + event;
+        // //   const slots = handlerInput.requestEnvelope.request.intent.slots;
+        // //   const timeSpec = slots.Time.value.toString();
+        //   console.log(timeSpec);
+        //   var hrSpec = parseInt(timeSpec.substring(0,2));
+        //   hrSpec = hrSpec + 12;
+        //   console.log(hrSpec);
+        var event = res.items[2].summary;
+      //  console.log(res.items[2].start.dateTime);
+        var c = 0;
+        var speechText = "Your next event is ";
+        while(c<=2){
+            //if(res.items.start.dateTime==)
+           
+            var dateStr = res.items[c].start.dateTime.toString();
+            //console.log(dateStr);
+            var hr = parseInt(dateStr.substring(11,13));
+            var min = parseInt(dateStr.substring(14,16))
+           // console.log(hr);
+            if(hr==14&&min==30)
+          //if(hr==hrSpec)
+            {
+                 speechText = speechText + res.items[c].summary + " ";
+            }
+
+            c++;
+        }
+      //  var speechText = 'Your next events is ' + event;
         resolve(
           handlerInput.responseBuilder
             .speak(speechText)
@@ -73,7 +98,7 @@ function getEmail(accessToken, callback) {
   };
 
   axios
-    .get('https://www.googleapis.com/calendar/v3/calendars/primary/events', header)
+    .get('https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=2019-01-14T10:00:00-07:00', header)
     .then(response => {
       console.log(response.data);                                   
       console.log(response.data.items[0].summary);
@@ -138,16 +163,8 @@ return handlerInput.responseBuilder
 exports.handler = Alexa.SkillBuilders.custom()
      .addRequestHandlers(LaunchRequestHandler,
                          HelloWorldIntentHandler,
-                         CalendarBasicHandler,
+                          CalendarBasicHandler,
                          HelpIntentHandler,
                          CancelAndStopIntentHandler,
                          SessionEndedRequestHandler)
      .lambda();
-
-
-
-
-
-
-
-
