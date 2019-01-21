@@ -16,6 +16,7 @@ return handlerInput.responseBuilder
             .getResponse();
     }
 };
+
 const HelloWorldIntentHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -30,6 +31,94 @@ return handlerInput.responseBuilder
             .getResponse();
     }
 };
+
+const CalendarCreateHandler = {
+    canHandle(handlerInput) {
+        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+            && handlerInput.requestEnvelope.request.intent.name === 'CalenderCreate';
+    },
+    handle(handlerInput){
+        var accessToken = handlerInput.requestEnvelope.context.System.user.accessToken;
+
+        if (accessToken == undefined){
+            // The request did not include a token, so tell the user to link
+            // accounts and return a LinkAccount card
+            var speechText = "Your calendar account is not linked";        
+           
+            return handlerInput.responseBuilder
+                .speak(speechText)
+                .withLinkAccountCard()
+                .getResponse();
+        }
+        else { 
+            const slots = handlerInput.requestEnvelope.request.intent.slots;
+            const eventName = slots.EventName.value.toString();
+        //     const data = {
+        //         "end": {
+        //           "dateTime": "2019-01-23T"+slots.EventEndTime.value.toString()+"+05:30"
+        //         },
+        //         "start": {
+        //           "dateTime": "2019-01-23T"+slots.EventStartTime.value.toString()+"+05:30"
+        //         },
+        //         "summary": slots.EventName.value.toString()
+        // };
+        console.log(eventName);
+        console.log(slots.EventStartTime.value.toString());
+        console.log(slots.EventEndTime.value.toString());
+            const data = {
+            "end": {
+              "dateTime": "2019-01-23T"+slots.EventEndTime.value.toString()+":00+05:30"
+            },
+            "start": {
+              "dateTime": "2019-01-23T"+slots.EventStartTime.value.toString()+":00+05:30"
+            },
+            "summary": eventName 
+    };
+            return new Promise(resolve => {
+            insertEvent(accessToken, data, res => {
+                console.log(res.status);
+                
+              var speechText = "Your event has been created ";
+              resolve(
+                handlerInput.responseBuilder
+                  .speak(speechText)
+                  .reprompt(speechText)
+                  .getResponse()
+              );
+            });
+          });                
+         }
+    }
+}
+
+function insertEvent(accessToken, data, callback) {
+
+    const header = {
+      headers: {'Authorization': 'Bearer ' + accessToken }
+     // 'content-type': 'application/json'
+    };
+  
+    // const data = {
+    //         "end": {
+    //           "dateTime": "2019-01-23T12:00:00+05:30"
+    //         },
+    //         "start": {
+    //           "dateTime": "2019-01-23T11:00:00+05:30"
+    //         },
+    //         "summary": summary 
+    // };
+    axios
+      .post('https://www.googleapis.com/calendar/v3/calendars/primary/events',data, header)
+      .then(response => {
+
+        console.log("Inserted the event")
+        callback(response.data);
+      }).catch((error) => {
+        console.log('Error occurred : '+error);
+    });
+
+  }
+
 const CalendarBasicHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -110,6 +199,8 @@ function getEmail(accessToken, callback) {
     });
 }
 
+
+
 const HelpIntentHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -163,6 +254,7 @@ return handlerInput.responseBuilder
 exports.handler = Alexa.SkillBuilders.custom()
      .addRequestHandlers(LaunchRequestHandler,
                          HelloWorldIntentHandler,
+                         CalendarCreateHandler,
                           CalendarBasicHandler,
                          HelpIntentHandler,
                          CancelAndStopIntentHandler,
