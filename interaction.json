@@ -1,0 +1,176 @@
+{
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "cal",
+            "intents": [
+                {
+                    "name": "AMAZON.FallbackIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
+                },
+                {
+                    "name": "HelloWorldIntent",
+                    "slots": [],
+                    "samples": [
+                        "hello",
+                        "hi",
+                        "say hello",
+                        "say hi"
+                    ]
+                },
+                {
+                    "name": "CalendarBasic",
+                    "slots": [
+                        {
+                            "name": "Time",
+                            "type": "AMAZON.TIME"
+                        }
+                    ],
+                    "samples": [
+                        "what event is at {Time}",
+                        "what is my next event",
+                        "next event",
+                        "when is my next event"
+                    ]
+                },
+                {
+                    "name": "CalenderCreate",
+                    "slots": [
+                        {
+                            "name": "EventName",
+                            "type": "EventName",
+                            "samples": [
+                                "The event is {EventName}",
+                                "{EventName}"
+                            ]
+                        },
+                        {
+                            "name": "EventStartTime",
+                            "type": "AMAZON.TIME",
+                            "samples": [
+                                "{EventStartTime}"
+                            ]
+                        },
+                        {
+                            "name": "EventEndTime",
+                            "type": "AMAZON.TIME"
+                        }
+                    ],
+                    "samples": [
+                        "create an event {EventName}"
+                    ]
+                }
+            ],
+            "types": [
+                {
+                    "name": "EventName",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "Test 1",
+                                "synonyms": [
+                                    "Test 3",
+                                    "Test 2"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "dialog": {
+            "intents": [
+                {
+                    "name": "CalenderCreate",
+                    "confirmationRequired": true,
+                    "prompts": {
+                        "confirmation": "Confirm.Intent.1225396651158"
+                    },
+                    "slots": [
+                        {
+                            "name": "EventName",
+                            "type": "EventName",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1225396651158.359659783055"
+                            }
+                        },
+                        {
+                            "name": "EventStartTime",
+                            "type": "AMAZON.TIME",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1225396651158.306512314081"
+                            }
+                        },
+                        {
+                            "name": "EventEndTime",
+                            "type": "AMAZON.TIME",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.1225396651158.1469064748520"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "delegationStrategy": "ALWAYS"
+        },
+        "prompts": [
+            {
+                "id": "Confirm.Intent.1225396651158",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Should the event be created?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1225396651158.359659783055",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What is the name of the event?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1225396651158.306512314081",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What is the start time?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1225396651158.1469064748520",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What is the end time?"
+                    }
+                ]
+            }
+        ]
+    }
+}
