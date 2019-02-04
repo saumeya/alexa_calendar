@@ -53,26 +53,25 @@ const CalendarCreateHandler = {
         else { 
             const slots = handlerInput.requestEnvelope.request.intent.slots;
             const eventName = slots.EventName.value.toString();
-        //     const data = {
-        //         "end": {
-        //           "dateTime": "2019-01-23T"+slots.EventEndTime.value.toString()+"+05:30"
-        //         },
-        //         "start": {
-        //           "dateTime": "2019-01-23T"+slots.EventStartTime.value.toString()+"+05:30"
-        //         },
-        //         "summary": slots.EventName.value.toString()
-        // };
+
         console.log(eventName);
         console.log(slots.EventStartTime.value.toString());
         console.log(slots.EventEndTime.value.toString());
+        console.log(slots.FirstName.value.toString());
+        console.log(slots.LastName.value.toString());
             const data = {
             "end": {
-              "dateTime": "2019-01-23T"+slots.EventEndTime.value.toString()+":00+05:30"
+              "dateTime": "2019-01-29T"+slots.EventEndTime.value.toString()+":00+05:30"
             },
             "start": {
-              "dateTime": "2019-01-23T"+slots.EventStartTime.value.toString()+":00+05:30"
+              "dateTime": "2019-01-29T"+slots.EventStartTime.value.toString()+":00+05:30"
             },
-            "summary": eventName 
+            "summary": eventName,
+            "attendees": [
+                {
+                  "email": slots.FirstName.value.toString()+"."+slots.LastName.value.toString()+"@cumminscollege.in"
+                }
+              ]
     };
             return new Promise(resolve => {
             insertEvent(accessToken, data, res => {
@@ -97,16 +96,7 @@ function insertEvent(accessToken, data, callback) {
       headers: {'Authorization': 'Bearer ' + accessToken }
      // 'content-type': 'application/json'
     };
-  
-    // const data = {
-    //         "end": {
-    //           "dateTime": "2019-01-23T12:00:00+05:30"
-    //         },
-    //         "start": {
-    //           "dateTime": "2019-01-23T11:00:00+05:30"
-    //         },
-    //         "summary": summary 
-    // };
+
     axios
       .post('https://www.googleapis.com/calendar/v3/calendars/primary/events',data, header)
       .then(response => {
@@ -146,27 +136,27 @@ const CalendarBasicHandler = {
         //   var hrSpec = parseInt(timeSpec.substring(0,2));
         //   hrSpec = hrSpec + 12;
         //   console.log(hrSpec);
-        var event = res.items[2].summary;
+        // var event = res.items[2].summary;
       //  console.log(res.items[2].start.dateTime);
-        var c = 0;
-        var speechText = "Your next event is ";
-        while(c<=2){
-            //if(res.items.start.dateTime==)
-           
-            var dateStr = res.items[c].start.dateTime.toString();
-            //console.log(dateStr);
-            var hr = parseInt(dateStr.substring(11,13));
-            var min = parseInt(dateStr.substring(14,16))
-           // console.log(hr);
-            if(hr==14&&min==30)
-          //if(hr==hrSpec)
-            {
-                 speechText = speechText + res.items[c].summary + " ";
-            }
+        // var c = 0;
+        // var speechText = "Your next event is ";
+        //     var hr = parseInt(dateStr.substring(11,13));
+        //     var min = parseInt(dateStr.substring(14,16))
+        //    // console.log(hr);
+        //     if(hr==14&&min==30)
+        //   //if(hr==hrSpec)
+        //     {
+        //          speechText = speechText + res.items[c].summary + " ";
+        //     }
 
-            c++;
-        }
-      //  var speechText = 'Your next events is ' + event;
+        //     c++;
+        // }
+       var speechText = 'Your next events are ' ;
+       for(var i=0;i<res.items.length;i++)
+       {
+           speechText = speechText + res.items[i].summary+" ";
+       }
+
         resolve(
           handlerInput.responseBuilder
             .speak(speechText)
@@ -187,7 +177,7 @@ function getEmail(accessToken, callback) {
   };
 
   axios
-    .get('https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=2019-01-14T10:00:00-07:00', header)
+    .get('https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=2019-01-18T10:00:00-07:00&orderBy=startTime&singleEvents=true', header)
     .then(response => {
       console.log(response.data);                                   
       console.log(response.data.items[0].summary);
@@ -199,6 +189,71 @@ function getEmail(accessToken, callback) {
     });
 }
 
+const CalendarQueryHandler = {
+    canHandle(handlerInput) {
+        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+            && handlerInput.requestEnvelope.request.intent.name === 'CalendarQuery';
+    },
+    handle(handlerInput) {
+         var accessToken = handlerInput.requestEnvelope.context.System.user.accessToken;
+        // var result;
+    if (accessToken == undefined){
+        // The request did not include a token, so tell the user to link
+        // accounts and return a LinkAccount card
+        var speechText = "Your calendar account is not linked";        
+       
+        return handlerInput.responseBuilder
+            .speak(speechText)
+            .withLinkAccountCard()
+            .getResponse();
+    } 
+    else { 
+        const slots = handlerInput.requestEnvelope.request.intent.slots;
+
+        console.log(slots.FirstName.value.toString());
+        console.log(slots.FirstName.value.toString());
+
+        var email = slots.FirstName.value.toString()+"."+slots.LastName.value.toString()+"@cumminscollege.in";
+      return new Promise(resolve => {
+      query(accessToken, email, res => {
+        
+       var speechText = 'Your next events is ' ;
+       for(var i=0;i<res.items.length;i++)
+       {
+           speechText = speechText + res.items[i].summary+" ";
+       }
+
+        resolve(
+          handlerInput.responseBuilder
+            .speak(speechText)
+            .reprompt(speechText)
+            .getResponse()
+        );
+      });
+    });                
+   }      
+  }
+};
+
+function query(accessToken, email,callback) {
+
+  const header = {
+    headers: {'Authorization': 'Bearer ' + accessToken }
+   // 'content-type': 'application/json'
+  };
+
+  axios
+    .get('https://www.googleapis.com/calendar/v3/calendars/'+email+'/events?timeMin=2019-01-14T10:00:00-07:00&orderBy=startTime&singleEvents=true', header)
+    .then(response => {
+      console.log(response.data);                                   
+      console.log(response.data.items[0].summary);
+      console.log(response.data.items[0].creator.email);
+       console.log(response.data.items[0].start.dateTime);
+     // var d = JSON.parse(response.data.items[0].creator)
+      //console.log(d.email);
+      callback(response.data);
+    });
+}
 
 
 const HelpIntentHandler = {
@@ -256,6 +311,7 @@ exports.handler = Alexa.SkillBuilders.custom()
                          HelloWorldIntentHandler,
                          CalendarCreateHandler,
                           CalendarBasicHandler,
+                          CalendarQueryHandler,
                          HelpIntentHandler,
                          CancelAndStopIntentHandler,
                          SessionEndedRequestHandler)

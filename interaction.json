@@ -68,11 +68,44 @@
                         },
                         {
                             "name": "EventEndTime",
-                            "type": "AMAZON.TIME"
+                            "type": "AMAZON.TIME",
+                            "samples": [
+                                "{EventEndTime}"
+                            ]
+                        },
+                        {
+                            "name": "FirstName",
+                            "type": "AMAZON.FirstName",
+                            "samples": [
+                                "{FirstName}"
+                            ]
+                        },
+                        {
+                            "name": "LastName",
+                            "type": "AMAZON.FirstName",
+                            "samples": [
+                                "{LastName}"
+                            ]
                         }
                     ],
                     "samples": [
                         "create an event {EventName}"
+                    ]
+                },
+                {
+                    "name": "CalendarQuery",
+                    "slots": [
+                        {
+                            "name": "FirstName",
+                            "type": "AMAZON.FirstName"
+                        },
+                        {
+                            "name": "LastName",
+                            "type": "AMAZON.FirstName"
+                        }
+                    ],
+                    "samples": [
+                        "what are the events for {FirstName} {LastName}"
                     ]
                 }
             ],
@@ -128,6 +161,24 @@
                             "prompts": {
                                 "elicitation": "Elicit.Slot.1225396651158.1469064748520"
                             }
+                        },
+                        {
+                            "name": "FirstName",
+                            "type": "AMAZON.FirstName",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.100424470954.57675333036"
+                            }
+                        },
+                        {
+                            "name": "LastName",
+                            "type": "AMAZON.FirstName",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.100424470954.1031423744633"
+                            }
                         }
                     ]
                 }
@@ -168,6 +219,24 @@
                     {
                         "type": "PlainText",
                         "value": "What is the end time?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.100424470954.57675333036",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "What is the first name of the attendant"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.100424470954.1031423744633",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "what is the last name of the attendant"
                     }
                 ]
             }
