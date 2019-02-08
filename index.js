@@ -109,6 +109,93 @@ function insertEvent(accessToken, data, callback) {
 
   }
 
+  const CalendarFreeBusyHandler = {
+    canHandle(handlerInput) {
+        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+            && handlerInput.requestEnvelope.request.intent.name === 'FreeBusy';
+    },
+    handle(handlerInput){
+        var accessToken = handlerInput.requestEnvelope.context.System.user.accessToken;
+
+        if (accessToken == undefined){
+
+            var speechText = "Your calendar account is not linked";        
+           
+            return handlerInput.responseBuilder
+                .speak(speechText)
+                .withLinkAccountCard()
+                .getResponse();
+        }
+        else { 
+            const slots = handlerInput.requestEnvelope.request.intent.slots;
+          
+       // console.log(slots.EventStartTime.value.toString());
+        const data ={
+            
+                "timeMin": "2019-01-29T00:00:00+05:30",
+                "timeMax": "2019-01-29T23:00:00+05:30",
+                "timeZone": "Asia/Kolkata",
+                "groupExpansionMax": 4,
+                "calendarExpansionMax": 4,
+                "items": [
+                  {
+                    "id": "priya.andurkar@cumminscollege.in"
+                  }//,
+                //   {
+                //     "id": "roshani.aher@cumminscollege.in"
+                //   }
+                ]
+              
+        };
+            return new Promise(resolve => {
+            freeBusyFunc(accessToken, data, res => {
+                
+                console.log(res.calendars);
+                
+                var speechText = "Here ";
+
+                for(var calID in res.calendars)
+                {
+                    console.log(calID);
+                    for(var key in res.calendars[calID].busy)
+                    {
+                        console.log(key);
+                        console.log("start "+res.calendars[calID].busy[key].start);
+                        console.log("end "+res.calendars[calID].busy[key].end);
+                    }
+                }
+
+              resolve(
+                handlerInput.responseBuilder
+                  .speak(speechText)
+                  .reprompt(speechText)
+                  .getResponse()
+              );
+            });
+          });                
+         }
+    }
+}
+
+function freeBusyFunc(accessToken, data, callback) {
+
+    const header = {
+      headers: {'Authorization': 'Bearer ' + accessToken }
+
+    };
+
+    axios
+      .post('https://www.googleapis.com/calendar/v3/freeBusy',data, header)
+      .then(response => {
+
+        console.log("Free Busy data")
+        callback(response.data);
+      }).catch((error) => {
+        console.log('Error occurred : '+error);
+    });
+
+  }
+
 const CalendarBasicHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -310,6 +397,7 @@ exports.handler = Alexa.SkillBuilders.custom()
      .addRequestHandlers(LaunchRequestHandler,
                          HelloWorldIntentHandler,
                          CalendarCreateHandler,
+                         CalendarFreeBusyHandler,
                           CalendarBasicHandler,
                           CalendarQueryHandler,
                          HelpIntentHandler,

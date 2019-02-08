@@ -107,6 +107,13 @@
                     "samples": [
                         "what are the events for {FirstName} {LastName}"
                     ]
+                },
+                {
+                    "name": "FreeBusy",
+                    "slots": [],
+                    "samples": [
+                        "free busy"
+                    ]
                 }
             ],
             "types": [
