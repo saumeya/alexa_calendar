@@ -2,6 +2,7 @@
 const Alexa = require('ask-sdk-core');
 const Request = require('request-promise');
 const axios = require('axios');
+const moment = require('moment');
 
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
@@ -140,10 +141,10 @@ function insertEvent(accessToken, data, callback) {
                 "items": [
                   {
                     "id": "priya.andurkar@cumminscollege.in"
-                  }//,
-                //   {
-                //     "id": "roshani.aher@cumminscollege.in"
-                //   }
+                  },
+                  {
+                    "id": "roshani.aher@cumminscollege.in"
+                  }
                 ]
               
         };
@@ -153,17 +154,60 @@ function insertEvent(accessToken, data, callback) {
                 console.log(res.calendars);
                 
                 var speechText = "Here ";
-
+                var i=0;
+                
+                const busy = {};//Stores every calendar's busy time slots
                 for(var calID in res.calendars)
                 {
-                    console.log(calID);
+                   
+                    var busyArr = [];
+                    i=0;
+                    var id = calID;
+                    
                     for(var key in res.calendars[calID].busy)
                     {
-                        console.log(key);
-                        console.log("start "+res.calendars[calID].busy[key].start);
-                        console.log("end "+res.calendars[calID].busy[key].end);
-                    }
+                    
+                        const time = {start : moment(res.calendars[calID].busy[key].start).format('LTS'),
+                                      end:moment(res.calendars[calID].busy[key].end).format('LTS')
+                         };
+                                busyArr[i] = time;
+                                i++;
+                    }   
+                   busy[id]= busyArr;
                 }
+
+                console.log(busy);
+                var free = {};//Stores each calendar's free time slots
+
+                for(var id in busy)
+                {
+                    
+                    var freeArr = [];
+                    for(i=0;i<=busy[id].length;i++)
+                    {
+                     //    const freeTime ={start,end};
+                     const freeTime ={};
+                        if(i==0)
+                        {
+                            freeTime.start = '00:00:00 AM';
+                             freeTime.end = busy[id][i].start;
+                        }
+                        else if(i==busy[id].length)
+                        {
+                             freeTime.start = busy[id][i-1].end;
+                             freeTime.end = '00:00:00 AM';
+                        }
+                        else
+                        {
+                             freeTime.start = busy[id][i-1].end;
+                             freeTime.end = busy[id][i].start;
+                        }
+     
+                        freeArr[i] = freeTime
+                    }
+                    free[id] = freeArr;
+                }
+                console.log(free);
 
               resolve(
                 handlerInput.responseBuilder
