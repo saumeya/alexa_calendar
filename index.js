@@ -130,7 +130,7 @@ function insertEvent(accessToken, data, callback) {
         else { 
             const slots = handlerInput.requestEnvelope.request.intent.slots;
           
-       // console.log(slots.EventStartTime.value.toString());
+       
         const data ={
             
                 "timeMin": "2019-01-29T00:00:00+05:30",
@@ -144,6 +144,9 @@ function insertEvent(accessToken, data, callback) {
                   },
                   {
                     "id": "roshani.aher@cumminscollege.in"
+                  },
+                  {
+                    "id": "saumeya.katyal@cumminscollege.in"
                   }
                 ]
               
@@ -151,63 +154,60 @@ function insertEvent(accessToken, data, callback) {
             return new Promise(resolve => {
             freeBusyFunc(accessToken, data, res => {
                 
-                console.log(res.calendars);
+                //console.log(res.calendars);
                 
                 var speechText = "Here ";
                 var i=0;
-                
-                const busy = {};//Stores every calendar's busy time slots
+                var firstID = "";
+                const busy1 = {};
+
                 for(var calID in res.calendars)
                 {
-                   
-                    var busyArr = [];
-                    i=0;
-                    var id = calID;
-                    
-                    for(var key in res.calendars[calID].busy)
-                    {
-                    
-                        const time = {start : moment(res.calendars[calID].busy[key].start).format('LTS'),
-                                      end:moment(res.calendars[calID].busy[key].end).format('LTS')
-                         };
-                                busyArr[i] = time;
-                                i++;
+                    var busyArr1 = [];
+
+                    if(i==0)
+                     {
+                        firstID = firstID+calID; 
+                        i++;
                     }   
-                   busy[id]= busyArr;
-                }
-
-                console.log(busy);
-                var free = {};//Stores each calendar's free time slots
-
-                for(var id in busy)
-                {
-                    
-                    var freeArr = [];
-                    for(i=0;i<=busy[id].length;i++)
+               
+                    var slotCounter=0;
+                    var free = [];
+                    for(var j=0;j<24;j++)
                     {
-                     //    const freeTime ={start,end};
-                     const freeTime ={};
-                        if(i==0)
-                        {
-                            freeTime.start = '00:00:00 AM';
-                             freeTime.end = busy[id][i].start;
-                        }
-                        else if(i==busy[id].length)
-                        {
-                             freeTime.start = busy[id][i-1].end;
-                             freeTime.end = '00:00:00 AM';
-                        }
-                        else
-                        {
-                             freeTime.start = busy[id][i-1].end;
-                             freeTime.end = busy[id][i].start;
-                        }
-     
-                        freeArr[i] = freeTime
+                       if(slotCounter<res.calendars[calID].busy.length)
+                       {
+                            var hour = parseInt(res.calendars[calID].busy[slotCounter].start.substring(11,13));
+                       }
+
+                       if(j==hour)
+                       {
+                           busyArr1[j] = 0;
+                           slotCounter = slotCounter+1;
+                       }
+                       else{
+                           busyArr1[j] = 1;
+
+                       }
                     }
-                    free[id] = freeArr;
+                  
+                   busy1[calID] = busyArr1;
                 }
-                console.log(free);
+
+                console.log(busy1);
+                console.log(firstID);
+                
+               free = busy1[firstID];
+              console.log(free);
+
+                for(var id1 in busy1)
+                {
+                        for(var j=0;j<24;j++)
+                        {
+                            free[j] = free[j] & busy1[id1][j];
+                        }
+                }
+               console.log(free);
 
               resolve(
                 handlerInput.responseBuilder
