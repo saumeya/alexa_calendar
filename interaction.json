@@ -35,14 +35,10 @@
                 },
                 {
                     "name": "CalendarBasic",
-                    "slots": [
-                        {
-                            "name": "Time",
-                            "type": "AMAZON.TIME"
-                        }
-                    ],
+                    "slots": [],
                     "samples": [
-                        "what event is at {Time}",
+                        "what's next",
+                        "what do i have next",
                         "what is my next event",
                         "next event",
                         "when is my next event"
@@ -72,20 +68,6 @@
                             "samples": [
                                 "{EventEndTime}"
                             ]
-                        },
-                        {
-                            "name": "FirstName",
-                            "type": "AMAZON.FirstName",
-                            "samples": [
-                                "{FirstName}"
-                            ]
-                        },
-                        {
-                            "name": "LastName",
-                            "type": "AMAZON.FirstName",
-                            "samples": [
-                                "{LastName}"
-                            ]
                         }
                     ],
                     "samples": [
@@ -93,26 +75,73 @@
                     ]
                 },
                 {
-                    "name": "CalendarQuery",
-                    "slots": [
-                        {
-                            "name": "FirstName",
-                            "type": "AMAZON.FirstName"
-                        },
-                        {
-                            "name": "LastName",
-                            "type": "AMAZON.FirstName"
-                        }
-                    ],
-                    "samples": [
-                        "what are the events for {FirstName} {LastName}"
-                    ]
-                },
-                {
                     "name": "FreeBusy",
                     "slots": [],
                     "samples": [
                         "free busy"
+                    ]
+                },
+                {
+                    "name": "CalendarBasicQuery",
+                    "slots": [
+                        {
+                            "name": "Time",
+                            "type": "AMAZON.TIME"
+                        },
+                        {
+                            "name": "Date",
+                            "type": "AMAZON.DATE"
+                        }
+                    ],
+                    "samples": [
+                        "event {Time} {Date}",
+                        "what do i have at {Time} {Date}"
+                    ]
+                },
+                {
+                    "name": "CalendarSlotQuery",
+                    "slots": [
+                        {
+                            "name": "EventTime",
+                            "type": "AMAZON.TIME"
+                        },
+                        {
+                            "name": "EventDate",
+                            "type": "AMAZON.DATE"
+                        }
+                    ],
+                    "samples": [
+                        "what is {EventDate} at {EventTime}",
+                        "what event is at {EventTime} {EventDate}",
+                        "what is at {EventTime} {EventDate}"
+                    ]
+                },
+                {
+                    "name": "CalendarQueryOther",
+                    "slots": [
+                        {
+                            "name": "EventTime",
+                            "type": "AMAZON.TIME"
+                        },
+                        {
+                            "name": "EventDate",
+                            "type": "AMAZON.DATE"
+                        },
+                        {
+                            "name": "FirstName",
+                            "type": "FirstName"
+                        },
+                        {
+                            "name": "LastName",
+                            "type": "LastName"
+                        }
+                    ],
+                    "samples": [
+                        "check {EventTime} {EventDate} for {FirstName} ",
+                        "what does {FirstName} have {EventDate} at {EventTime}",
+                        "is {FirstName} free {EventDate} at {EventTime}",
+                        "is {FirstName} free at {EventTime} {EventDate}",
+                        "what does {FirstName} have at {EventTime} {EventDate}"
                     ]
                 }
             ],
@@ -127,6 +156,60 @@
                                     "Test 3",
                                     "Test 2"
                                 ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "LastName",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "aher"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "katyal"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "andurkar"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "sarode"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "FirstName",
+                    "values": [
+                        {
+                            "id": "roshani.aher@cumminscollege.in",
+                            "name": {
+                                "value": "roshani"
+                            }
+                        },
+                        {
+                            "id": "krutika.sarode@cumminscollege.in",
+                            "name": {
+                                "value": "krutika"
+                            }
+                        },
+                        {
+                            "id": "priya.andurkar@cumminscollege.in",
+                            "name": {
+                                "value": "priya"
+                            }
+                        },
+                        {
+                            "id": "saumeya.katyal@cumminscollege.in",
+                            "name": {
+                                "value": "saumeya"
                             }
                         }
                     ]
@@ -167,24 +250,6 @@
                             "elicitationRequired": true,
                             "prompts": {
                                 "elicitation": "Elicit.Slot.1225396651158.1469064748520"
-                            }
-                        },
-                        {
-                            "name": "FirstName",
-                            "type": "AMAZON.FirstName",
-                            "confirmationRequired": false,
-                            "elicitationRequired": true,
-                            "prompts": {
-                                "elicitation": "Elicit.Slot.100424470954.57675333036"
-                            }
-                        },
-                        {
-                            "name": "LastName",
-                            "type": "AMAZON.FirstName",
-                            "confirmationRequired": false,
-                            "elicitationRequired": true,
-                            "prompts": {
-                                "elicitation": "Elicit.Slot.100424470954.1031423744633"
                             }
                         }
                     ]
@@ -235,15 +300,6 @@
                     {
                         "type": "PlainText",
                         "value": "What is the first name of the attendant"
-                    }
-                ]
-            },
-            {
-                "id": "Elicit.Slot.100424470954.1031423744633",
-                "variations": [
-                    {
-                        "type": "PlainText",
-                        "value": "what is the last name of the attendant"
                     }
                 ]
             }
