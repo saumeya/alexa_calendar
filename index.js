@@ -58,8 +58,8 @@ const CalendarCreateHandler = {
         console.log(eventName);
         console.log(slots.EventStartTime.value.toString());
         console.log(slots.EventEndTime.value.toString());
-        console.log(slots.FirstName.value.toString());
-        console.log(slots.LastName.value.toString());
+        // console.log(slots.FirstName.value.toString());
+        // console.log(slots.LastName.value.toString());
             const data = {
             "end": {
               "dateTime": "2019-01-29T"+slots.EventEndTime.value.toString()+":00+05:30"
@@ -67,12 +67,12 @@ const CalendarCreateHandler = {
             "start": {
               "dateTime": "2019-01-29T"+slots.EventStartTime.value.toString()+":00+05:30"
             },
-            "summary": eventName,
-            "attendees": [
-                {
-                  "email": slots.FirstName.value.toString()+"."+slots.LastName.value.toString()+"@cumminscollege.in"
-                }
-              ]
+            "summary": eventName
+            // "attendees": [
+            //     {
+            //       "email": slots.FirstName.value.toString()+"."+slots.LastName.value.toString()+"@cumminscollege.in"
+            //     }
+//              ]
     };
             return new Promise(resolve => {
             insertEvent(accessToken, data, res => {
@@ -129,21 +129,28 @@ function insertEvent(accessToken, data, callback) {
         }
         else { 
             const slots = handlerInput.requestEnvelope.request.intent.slots;
-          
-       
+            const dateFree = slots.EventDate.value.toString();
+            console.log(dateFree);
+            var email1 = handlerInput.requestEnvelope.request.intent.slots.FirstName.resolutions.resolutionsPerAuthority[0].values[0].value.id.toString();
+            var email2 = handlerInput.requestEnvelope.request.intent.slots.Name.resolutions.resolutionsPerAuthority[0].values[0].value.id.toString();
+            var dur = slots.Duration.value;
+            console.log(email1);
+            console.log(email2);
+           // console.log(slots.EventDate.value.toString());
+            
         const data ={
             
-                "timeMin": "2019-01-29T00:00:00+05:30",
-                "timeMax": "2019-01-29T23:00:00+05:30",
+                "timeMin": dateFree+"T00:00:00+05:30",
+                "timeMax": dateFree+"T23:00:00+05:30",
                 "timeZone": "Asia/Kolkata",
                 "groupExpansionMax": 4,
                 "calendarExpansionMax": 4,
                 "items": [
                   {
-                    "id": "priya.andurkar@cumminscollege.in"
+                    "id": email1
                   },
                   {
-                    "id": "roshani.aher@cumminscollege.in"
+                    "id": email2
                   },
                   {
                     "id": "saumeya.katyal@cumminscollege.in"
@@ -153,10 +160,7 @@ function insertEvent(accessToken, data, callback) {
         };
             return new Promise(resolve => {
             freeBusyFunc(accessToken, data, res => {
-                
-                //console.log(res.calendars);
-                
-                var speechText = "Here ";
+                // var speechText = "Here ";
                 var i=0;
                 var firstID = "";
                 const busy1 = {};
@@ -166,28 +170,27 @@ function insertEvent(accessToken, data, callback) {
                     var busyArr1 = [];
 
                     if(i==0)
-                     {
+                    {
                         firstID = firstID+calID; 
                         i++;
                     }   
                
                     var slotCounter=0;
                     var free = [];
-                    for(var j=0;j<24;j++)
+                    for(var j=0;j<8;j++)
                     {
                        if(slotCounter<res.calendars[calID].busy.length)
                        {
                             var hour = parseInt(res.calendars[calID].busy[slotCounter].start.substring(11,13));
                        }
 
-                       if(j==hour)
+                       if(j==hour-9)
                        {
                            busyArr1[j] = 0;
                            slotCounter = slotCounter+1;
                        }
                        else{
                            busyArr1[j] = 1;
-
                        }
                     }
                   
@@ -198,17 +201,112 @@ function insertEvent(accessToken, data, callback) {
                 console.log(firstID);
                 
                free = busy1[firstID];
-              console.log(free);
-
+              
                 for(var id1 in busy1)
                 {
-                        for(var j=0;j<24;j++)
+                        for(var j=0;j<8;j++)
                         {
                             free[j] = free[j] & busy1[id1][j];
                         }
                 }
-               console.log(free);
+                var speechText = "They are free";
+                // var duration = 2;
+                var duration = parseInt(dur.substring(2,3));
+            //    console.log(dur);
+            //    console.log(typeof(dur));
+                i=0;
+                var t1,t2;
+                for(var j=0;j<8;j++)
+                {
+                    if(free[j]!=0)
+                    {
+                        i++;
+                    }
+                   
+                    else{
+                       
+                        if(i>=duration)
+                        {
+                            
+                            //  t1 = (j-i+9);
+                            //  t2 = (j-1+9);
+                            //  if(t1==12)
+                            //  {
+                            //      t1 = t1.toString()+"p.m.";
+                            //  }
+                            //  if(t2==12)
+                            //  {
+                            //      t1 = t1.toString()+"p.m.";
+                            //  }
+                            //  if(t1>12)
+                            //  {
+                            //      t1 = (t1-12).toString()+"p.m.";
+                             
+                            //  }else{
+                            //     t1 = t1.toString()+"a.m.";
+                            //  }
+                            //  if(t2>12)
+                            //  {
+                            //      t2 = (t2-12).toString()+"p.m.";
+                            //  }else{
+                            //     t2 = t2.toString()+"a.m.";
+                            //  }
+                            //speechText = speechText + t1 + " to " +t2+", ";
+                            t1 = j-i;
+                            t2 = j;
+                            if(t1<4)
+                            t1+=9;
+                            else
+                            t1-=3;
+                            
+                            if(t2<4)
+                            t2+=9;
+                            else
+                            t2-=3
 
+                            speechText = speechText + t1 + " to " +t2+", ";
+                           // i=0;
+                            console.log(speechText);
+                        }
+                        i = 0;
+                    }
+                    if(j==7&&i>=duration)
+                    {
+                        // t1 = (j-i+9+1);
+                        // t2 = (j+9+1);
+                        t1 = j+1-i;
+                        t2 = j+1;
+                            if(t1<4)
+                            t1+=9;
+                            else
+                            t1-=3;
+                            
+                            if(t2<4)
+                            t2+=9;
+                            else
+                            t2-=3
+                            // if(t1>12)
+                            //  {
+                            //      t1 = (t1-12).toString()+"p.m.";
+                             
+                            //  }else{
+                            //     t1 = t1.toString()+"a.m.";
+                            //  }
+                            //  if(t2>12)
+                            //  {
+                            //      t2 = (t2-12).toString()+"p.m.";
+                            //  }else{
+                            //     t2 = t2.toString()+"a.m.";
+                            //  }
+                        speechText = speechText +t1 + " to " +t2;
+                        console.log(speechText);
+                    }
+                }
+               console.log(free);
+               if(speechText=="They are free"){
+                   speechText = "They are not available";
+               }
+              
               resolve(
                 handlerInput.responseBuilder
                   .speak(speechText)
