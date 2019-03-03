@@ -24,14 +24,15 @@ const HelloWorldIntentHandler = {
             && handlerInput.requestEnvelope.request.intent.name === 'HelloWorldIntent';
     },
     handle(handlerInput) {
-        const speechText = 'Hello World!';
+        var speechText = 'Hello World!';
          console.log('res');
-return handlerInput.responseBuilder
+        return handlerInput.responseBuilder
             .speak(speechText)
             .withSimpleCard('Hello World', speechText)
             .getResponse();
     }
 };
+
 
 const CalendarCreateHandler = {
     canHandle(handlerInput) {
@@ -42,8 +43,6 @@ const CalendarCreateHandler = {
         var accessToken = handlerInput.requestEnvelope.context.System.user.accessToken;
 
         if (accessToken == undefined){
-            // The request did not include a token, so tell the user to link
-            // accounts and return a LinkAccount card
             var speechText = "Your calendar account is not linked";        
            
             return handlerInput.responseBuilder
@@ -54,31 +53,43 @@ const CalendarCreateHandler = {
         else { 
             const slots = handlerInput.requestEnvelope.request.intent.slots;
             const eventName = slots.EventName.value.toString();
-
-        console.log(eventName);
-        console.log(slots.EventStartTime.value.toString());
-        console.log(slots.EventEndTime.value.toString());
-        // console.log(slots.FirstName.value.toString());
-        // console.log(slots.LastName.value.toString());
-            const data = {
+            const eventDate = slots.EventDate.value.toString();
+            const startTime = slots.EventStartTime.value.toString();
+            const endTime = slots.EventEndTime.value.toString();   
+             
+            var names = [];
+            var email = {};
+            var nameCnt =0;
+            for(var slotKey in slots)
+            {
+               // console.log(slotKey);
+                if(slotKey.includes('Name')&&slotKey.length==5&&slots[slotKey].value!=undefined)
+                {
+                   //console.log(slotKey);
+                   console.log(slots[slotKey].resolutions.resolutionsPerAuthority[0].values[0].value.id.toString());
+                   email = slots[slotKey].resolutions.resolutionsPerAuthority[0].values[0].value.id.toString();
+                //    names[nameCnt] = emailList;
+                names.push({"email":email});
+                nameCnt++;
+                }
+            }
+            console.log(names);
+        const data = {
             "end": {
-              "dateTime": "2019-01-29T"+slots.EventEndTime.value.toString()+":00+05:30"
+              "dateTime": eventDate+"T"+endTime+":00+05:30"
             },
             "start": {
-              "dateTime": "2019-01-29T"+slots.EventStartTime.value.toString()+":00+05:30"
+              "dateTime": eventDate+"T"+startTime+":00+05:30"
             },
-            "summary": eventName
-            // "attendees": [
-            //     {
-            //       "email": slots.FirstName.value.toString()+"."+slots.LastName.value.toString()+"@cumminscollege.in"
-            //     }
-//              ]
+            "summary": eventName,
+            "attendees":names
     };
             return new Promise(resolve => {
             insertEvent(accessToken, data, res => {
                 console.log(res.status);
                 
               var speechText = "Your event has been created ";
+              
               resolve(
                 handlerInput.responseBuilder
                   .speak(speechText)
@@ -129,15 +140,45 @@ function insertEvent(accessToken, data, callback) {
         }
         else { 
             const slots = handlerInput.requestEnvelope.request.intent.slots;
-            const dateFree = slots.EventDate.value.toString();
+            var freeHrStart;//Which hour and minute to start looking for free slots from
+            var freeMinStart;
+            if(slots.EventDate.value!=undefined)
+            {
+                var dateFree = slots.EventDate.value.toString();
+                freeHrStart = 0;
+                freeMinStart = 0;
+            }
+            else
+            {
+                var currentdate = new Date(); 
+                var dateFree = "" + currentdate.getFullYear() + "-"
+                                + (currentdate.getMonth()+1)  + "-" 
+                                + currentdate.getDate();
+
+                freeHrStart = currentdate.getHours();
+                freeMinStart = currentdate.getMinutes();
+            }
             console.log(dateFree);
-            var email1 = handlerInput.requestEnvelope.request.intent.slots.FirstName.resolutions.resolutionsPerAuthority[0].values[0].value.id.toString();
-            var email2 = handlerInput.requestEnvelope.request.intent.slots.Name.resolutions.resolutionsPerAuthority[0].values[0].value.id.toString();
             var dur = slots.Duration.value;
-            console.log(email1);
-            console.log(email2);
-           // console.log(slots.EventDate.value.toString());
-            
+            var duration = 1;
+            if(slots.Duration.value!=undefined)
+            {
+                duration  = 2 * parseInt(slots.Duration.value.substring(2,3));
+            }
+            var names = [];
+            var email = {};
+            var nameCnt =0;
+            for(var slotKey in slots)
+            {
+                if(slotKey.includes('Name')&&slotKey.length==5&&slots[slotKey].value!=undefined)
+                {
+                   email = slots[slotKey].resolutions.resolutionsPerAuthority[0].values[0].value.id.toString();
+                names.push({"id":email});
+                nameCnt++;
+                }
+
+            }
+    
         const data ={
             
                 "timeMin": dateFree+"T00:00:00+05:30",
@@ -145,30 +186,31 @@ function insertEvent(accessToken, data, callback) {
                 "timeZone": "Asia/Kolkata",
                 "groupExpansionMax": 4,
                 "calendarExpansionMax": 4,
-                "items": [
-                  {
-                    "id": email1
-                  },
-                  {
-                    "id": email2
-                  },
-                  {
-                    "id": "saumeya.katyal@cumminscollege.in"
-                  }
-                ]
-              
+                // "items": [
+                //   {
+                //     "id": email1
+                //   },
+                //   {
+                //     "id": email2
+                //   },
+                //   {
+                //     "id": "saumeya.katyal@cumminscollege.in"
+                //   }
+                // ]
+              "items":names
         };
             return new Promise(resolve => {
             freeBusyFunc(accessToken, data, res => {
-                // var speechText = "Here ";
+              
                 var i=0;
                 var firstID = "";
                 const busy1 = {};
-
+                
                 for(var calID in res.calendars)
                 {
                     var busyArr1 = [];
-
+                    console.log(calID);
+                    console.log(res.calendars[calID]);
                     if(i==0)
                     {
                         firstID = firstID+calID; 
@@ -176,47 +218,161 @@ function insertEvent(accessToken, data, callback) {
                     }   
                
                     var slotCounter=0;
-                    var free = [];
-                    for(var j=0;j<8;j++)
+                    var j=0;
+                    while(j<16)
                     {
                        if(slotCounter<res.calendars[calID].busy.length)
                        {
-                            var hour = parseInt(res.calendars[calID].busy[slotCounter].start.substring(11,13));
+                            var startHr = parseInt(res.calendars[calID].busy[slotCounter].start.substring(11,13));
+                            var startMins = parseInt(res.calendars[calID].busy[slotCounter].start.substring(14,16));
+                            var endHr = parseInt(res.calendars[calID].busy[slotCounter].end.substring(11,13));
+                            var endMins = parseInt(res.calendars[calID].busy[slotCounter].end.substring(14,16));
                        }
 
-                       if(j==hour-9)
+                       if(startMins==0&&endMins==0)
                        {
-                           busyArr1[j] = 0;
-                           slotCounter = slotCounter+1;
+                           endHr = endHr - 9;
+                           endHr += endHr;
+                           startHr = startHr - 9;
+                           startHr += startHr;
+
+                           if(j==startHr)
+                           {
+                               busyArr1[j] = 0;
+                              
+                               slotCounter+=1;
+                               for(var k=j+1;k<endHr;k++)
+                               {
+                                  
+                                   busyArr1[k] = 0;
+                                   j+=1;
+                                 
+                               }
+                               j++;
+                           }
+                           else
+                           {
+                            busyArr1[j] = 1;
+                            j++;
+                           }
                        }
-                       else{
-                           busyArr1[j] = 1;
+                       else if(startMins==30&&endMins==30)
+                       {
+                        endHr = endHr - 9;
+                        endHr += endHr;
+                        startHr = startHr - 9;
+                        startHr += startHr;
+
+                        if(j==startHr+1)
+                        {
+                            busyArr1[j] = 0;
+                           
+                            slotCounter+=1;
+                            for(var k=j+1;k<=endHr;k++)
+                            {
+                            
+                                busyArr1[k] = 0;
+                                j+=1;
+                             
+                            }
+                            j++;
+                        }
+                        else
+                        {
+                         busyArr1[j] = 1;
+                         j++;
+                        }
+                       }
+                       else if(startMins==0&&endMins==30)
+                       {  
+                        endHr = endHr - 9;
+                        endHr += endHr;
+                        startHr = startHr - 9;
+                        startHr += startHr;
+
+                        if(j==startHr)
+                        {
+                            busyArr1[j] = 0;
+                         
+                            slotCounter+=1;
+                            for(var k=j+1;k<=endHr;k++)
+                            {
+                             
+                                busyArr1[k] = 0;
+                                j+=1;
+                              
+                            }
+                            j++;
+                        }
+                        else
+                        {
+                         busyArr1[j] = 1;
+                         j++;
+                        }
+                       }
+                       else
+                       {
+                        endHr = endHr - 9;
+                        endHr += endHr;
+                        startHr = startHr - 9;
+                        startHr += startHr;
+
+                        if(j==startHr+1)
+                        {
+                            busyArr1[j] = 0;
+                           
+                            slotCounter+=1;
+                            for(var k=j+1;k<endHr;k++)
+                            {
+                             
+                                busyArr1[k] = 0;
+                                j+=1;
+                               
+                            }
+                            j++;
+                        }
+                        else
+                        {
+                         busyArr1[j] = 1;
+                         j++;
+                        }
                        }
                     }
-                  
+                  //console.log(busyArr1);
                    busy1[calID] = busyArr1;
                 }
 
                 console.log(busy1);
                 console.log(firstID);
                 
-               free = busy1[firstID];
+               var free = busy1[firstID];
               
                 for(var id1 in busy1)
                 {
-                        for(var j=0;j<8;j++)
+                        for(var j=0;j<16;j++)
                         {
                             free[j] = free[j] & busy1[id1][j];
                         }
                 }
-                var speechText = "They are free";
-                // var duration = 2;
-                var duration = parseInt(dur.substring(2,3));
-            //    console.log(dur);
-            //    console.log(typeof(dur));
+                console.log(free);
+                var speechText = "They are free ";
+                 
                 i=0;
                 var t1,t2;
-                for(var j=0;j<8;j++)
+                var st;
+                if(freeHrStart==0)
+                {
+                    st=0;
+                }
+                else
+                {
+                        freeHrStart -= 9;
+                        freeHrStart += freeHrStart;
+                        freeHrStart +=1;
+                        st = freeHrStart;
+                }
+                console.log(st);
+                for(var j=st;j<16;j++)
                 {
                     if(free[j]!=0)
                     {
@@ -227,83 +383,130 @@ function insertEvent(accessToken, data, callback) {
                        
                         if(i>=duration)
                         {
-                            
-                            //  t1 = (j-i+9);
-                            //  t2 = (j-1+9);
-                            //  if(t1==12)
-                            //  {
-                            //      t1 = t1.toString()+"p.m.";
-                            //  }
-                            //  if(t2==12)
-                            //  {
-                            //      t1 = t1.toString()+"p.m.";
-                            //  }
-                            //  if(t1>12)
-                            //  {
-                            //      t1 = (t1-12).toString()+"p.m.";
-                             
-                            //  }else{
-                            //     t1 = t1.toString()+"a.m.";
-                            //  }
-                            //  if(t2>12)
-                            //  {
-                            //      t2 = (t2-12).toString()+"p.m.";
-                            //  }else{
-                            //     t2 = t2.toString()+"a.m.";
-                            //  }
-                            //speechText = speechText + t1 + " to " +t2+", ";
                             t1 = j-i;
                             t2 = j;
-                            if(t1<4)
-                            t1+=9;
+                            console.log(j); console.log(i)
+                            console.log(t1);
+                            console.log(t2);
+                            if(t1<4&&t1%2==0)
+                                 t1+=9;
+                            else if(t1<4&&t1%2!=0)
+                            {
+                                t1+=7;
+                                t1 = t1.toString();
+                                t1 = t1 + ":30"
+                            }
+                            else if(t1>=4&&t1%2==0)
+                            {
+                                //t1-=3;
+                                t1 = t1/2;
+                                t1=t1+9;
+                                console.log(t1);
+                            }
                             else
-                            t1-=3;
+                            {
+                                // t1-=2;
+                                t1 = parseInt(t1/2);
+                                console.log(t1);
+                                t1=t1+9;
+                                t1 = t1.toString();
+                                t1 = t1 + ":30"
+                                console.log(t1);
+                            }
                             
-                            if(t2<4)
-                            t2+=9;
+                            
+                            if(t2<4&&t2%2==0)
+                                 t2+=9;
+                            else if(t2<4&&t2%2!=0)
+                            {
+                                t2+=7;
+                                t2 = t2.toString();
+                                t2 = t2 + ":30"
+                            }
+                            else if(t2>=4&&t2%2==0)
+                            {
+                               // t2-=3;
+                               t2 = t2/2;
+                               t2=t2+9;
+                            }
                             else
-                            t2-=3
+                            {
+                              //  t2-=2;
+                              t2 = parseInt(t2/2);
+                              t2=t2+9;
+                                t2 = t2.toString();
+                                t2 = t2 + ":30"
+                            }
 
                             speechText = speechText + t1 + " to " +t2+", ";
                            // i=0;
+                           while(free[j]==0)
+                           {
+                               j=j+1;
+                           }
+                           j=j-1;
                             console.log(speechText);
                         }
                         i = 0;
+                        console.log(j);
                     }
-                    if(j==7&&i>=duration)
+                    if(j==15&&i>=duration)
                     {
-                        // t1 = (j-i+9+1);
-                        // t2 = (j+9+1);
+                        
                         t1 = j+1-i;
                         t2 = j+1;
-                            if(t1<4)
+                        if(t1<4&&t1%2==0)
                             t1+=9;
-                            else
-                            t1-=3;
-                            
-                            if(t2<4)
-                            t2+=9;
-                            else
-                            t2-=3
-                            // if(t1>12)
-                            //  {
-                            //      t1 = (t1-12).toString()+"p.m.";
-                             
-                            //  }else{
-                            //     t1 = t1.toString()+"a.m.";
-                            //  }
-                            //  if(t2>12)
-                            //  {
-                            //      t2 = (t2-12).toString()+"p.m.";
-                            //  }else{
-                            //     t2 = t2.toString()+"a.m.";
-                            //  }
+                        else if(t1<4&&t1%2!=0)
+                        {
+                            t1+=7;
+                            t1 = t1.toString();
+                            t1 = t1 + ":30"
+                        }
+                        else if(t1>=4&&t1%2==0)
+                        {
+                            //t1-=3;
+                            t1 = t1/2;
+                            t1=t1+9;
+                        }
+                        else
+                        {
+                           // t1-=2;
+                           t1 = parseInt(t1/2);
+                           t1=t1+9;
+                            t1 = t1.toString();
+                            t1 = t1 + ":30"
+                        }
+                                    
+                        if(t2<4&&t2%2==0)
+                        t2+=9;
+                        else if(t2<4&&t2%2==0)
+                        {
+                            t2+=7;
+                            t2 = t2.toString();
+                            t2 = t2 + ":30"
+                        }
+                        else if(t2>=4&&t2%2==0)
+                        {
+                            //t2-=3;
+                            t2 = t2/2;
+                            t2=t2+9;
+                        }
+                        else
+                        {
+                            // t2-=2;
+                            t2 = parseInt(t2/2);
+                            t2=t2+9;
+                            t2 = t2.toString();
+                            t2 = t2 + ":30"
+                        }
+     
                         speechText = speechText +t1 + " to " +t2;
                         console.log(speechText);
                     }
                 }
                console.log(free);
-               if(speechText=="They are free"){
+               if(speechText=="They are free "){
                    speechText = "They are not available";
                }
               

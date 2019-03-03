@@ -68,17 +68,62 @@
                             "samples": [
                                 "{EventEndTime}"
                             ]
+                        },
+                        {
+                            "name": "EventDate",
+                            "type": "AMAZON.DATE"
+                        },
+                        {
+                            "name": "NameA",
+                            "type": "FirstName"
+                        },
+                        {
+                            "name": "NameB",
+                            "type": "FirstName"
+                        },
+                        {
+                            "name": "NameC",
+                            "type": "FirstName"
                         }
                     ],
                     "samples": [
-                        "create an event {EventName}"
+                        "create an event with {NameA} {NameB} {NameC} on {EventDate}",
+                        "create an event with {NameA} {NameB} on {EventDate}"
                     ]
                 },
                 {
                     "name": "FreeBusy",
-                    "slots": [],
+                    "slots": [
+                        {
+                            "name": "EventDate",
+                            "type": "AMAZON.DATE"
+                        },
+                        {
+                            "name": "Duration",
+                            "type": "AMAZON.DURATION"
+                        },
+                        {
+                            "name": "NameA",
+                            "type": "FirstName"
+                        },
+                        {
+                            "name": "NameB",
+                            "type": "FirstName"
+                        },
+                        {
+                            "name": "NameC",
+                            "type": "FirstName"
+                        }
+                    ],
                     "samples": [
-                        "free busy"
+                        "when are {NameA} {NameB} {NameC} free {EventDate} for {Duration}",
+                        "When are {NameA}  {NameB}  free {EventDate} for {Duration}",
+                        "When are {NameA}  {NameB}  free {Duration}",
+                        "when are {NameA} {NameB} {NameC} free {Duration}",
+                        "when are {NameA} {NameB} {NameC} free",
+                        "When are {NameA}  {NameB}  free",
+                        "when are {NameA} {NameB} {NameC} free {EventDate}",
+                        "When are {NameA}  {NameB}  free {EventDate}"
                     ]
                 },
                 {
@@ -130,10 +175,6 @@
                         {
                             "name": "FirstName",
                             "type": "FirstName"
-                        },
-                        {
-                            "name": "LastName",
-                            "type": "LastName"
                         }
                     ],
                     "samples": [
@@ -251,6 +292,76 @@
                             "prompts": {
                                 "elicitation": "Elicit.Slot.1225396651158.1469064748520"
                             }
+                        },
+                        {
+                            "name": "EventDate",
+                            "type": "AMAZON.DATE",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        },
+                        {
+                            "name": "NameA",
+                            "type": "FirstName",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        },
+                        {
+                            "name": "NameB",
+                            "type": "FirstName",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        },
+                        {
+                            "name": "NameC",
+                            "type": "FirstName",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        }
+                    ]
+                },
+                {
+                    "name": "FreeBusy",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "EventDate",
+                            "type": "AMAZON.DATE",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        },
+                        {
+                            "name": "Duration",
+                            "type": "AMAZON.DURATION",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        },
+                        {
+                            "name": "NameA",
+                            "type": "FirstName",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        },
+                        {
+                            "name": "NameB",
+                            "type": "FirstName",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        },
+                        {
+                            "name": "NameC",
+                            "type": "FirstName",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
                         }
                     ]
                 }
@@ -300,6 +411,24 @@
                     {
                         "type": "PlainText",
                         "value": "What is the first name of the attendant"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.60231077689.1427402196731",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "For when do you want to check?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.60231077689.1085859550140",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "For how long?"
                     }
                 ]
             }
