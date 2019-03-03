@@ -368,7 +368,10 @@ function insertEvent(accessToken, data, callback) {
                 {
                         freeHrStart -= 9;
                         freeHrStart += freeHrStart;
-                        freeHrStart +=1;
+                        if(freeMinStart<30)
+                            freeHrStart +=1;
+                        else
+                            freeHrStart +=2;
                         st = freeHrStart;
                 }
                 console.log(st);
