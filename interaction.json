@@ -24,16 +24,6 @@
                     "samples": []
                 },
                 {
-                    "name": "HelloWorldIntent",
-                    "slots": [],
-                    "samples": [
-                        "hello",
-                        "hi",
-                        "say hello",
-                        "say hi"
-                    ]
-                },
-                {
                     "name": "CalendarBasic",
                     "slots": [],
                     "samples": [
@@ -127,41 +117,6 @@
                     ]
                 },
                 {
-                    "name": "CalendarBasicQuery",
-                    "slots": [
-                        {
-                            "name": "Time",
-                            "type": "AMAZON.TIME"
-                        },
-                        {
-                            "name": "Date",
-                            "type": "AMAZON.DATE"
-                        }
-                    ],
-                    "samples": [
-                        "event {Time} {Date}",
-                        "what do i have at {Time} {Date}"
-                    ]
-                },
-                {
-                    "name": "CalendarSlotQuery",
-                    "slots": [
-                        {
-                            "name": "EventTime",
-                            "type": "AMAZON.TIME"
-                        },
-                        {
-                            "name": "EventDate",
-                            "type": "AMAZON.DATE"
-                        }
-                    ],
-                    "samples": [
-                        "what is {EventDate} at {EventTime}",
-                        "what event is at {EventTime} {EventDate}",
-                        "what is at {EventTime} {EventDate}"
-                    ]
-                },
-                {
                     "name": "CalendarQueryOther",
                     "slots": [
                         {
@@ -178,6 +133,8 @@
                         }
                     ],
                     "samples": [
+                        "what is {EventDate} at {EventTime}",
+                        "what event is at {EventTime} {EventDate}",
                         "check {EventTime} {EventDate} for {FirstName} ",
                         "what does {FirstName} have {EventDate} at {EventTime}",
                         "is {FirstName} free {EventDate} at {EventTime}",
@@ -190,6 +147,16 @@
                 {
                     "name": "EventName",
                     "values": [
+                        {
+                            "name": {
+                                "value": "Design Meeting"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "Project Meet "
+                            }
+                        },
                         {
                             "name": {
                                 "value": "Test 1",

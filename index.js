@@ -18,22 +18,6 @@ return handlerInput.responseBuilder
     }
 };
 
-const HelloWorldIntentHandler = {
-    canHandle(handlerInput) {
-        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-            && handlerInput.requestEnvelope.request.intent.name === 'HelloWorldIntent';
-    },
-    handle(handlerInput) {
-        var speechText = 'Hello World!';
-         console.log('res');
-        return handlerInput.responseBuilder
-            .speak(speechText)
-            .withSimpleCard('Hello World', speechText)
-            .getResponse();
-    }
-};
-
-
 const CalendarCreateHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -121,7 +105,7 @@ function insertEvent(accessToken, data, callback) {
 
   }
 
-  const CalendarFreeBusyHandler = {
+  const  CalendarFreeBusyHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
             && handlerInput.requestEnvelope.request.intent.name === 'FreeBusy';
@@ -202,6 +186,7 @@ function insertEvent(accessToken, data, callback) {
             return new Promise(resolve => {
             freeBusyFunc(accessToken, data, res => {
               
+             //   console.log(res);
                 var i=0;
                 var firstID = "";
                 const busy1 = {};
@@ -221,6 +206,7 @@ function insertEvent(accessToken, data, callback) {
                     var j=0;
                     while(j<16)
                     {
+                       // console.log("Length: "+res.calendars[calID].busy.length);
                        if(slotCounter<res.calendars[calID].busy.length)
                        {
                             var startHr = parseInt(res.calendars[calID].busy[slotCounter].start.substring(11,13));
@@ -310,7 +296,7 @@ function insertEvent(accessToken, data, callback) {
                          j++;
                         }
                        }
-                       else
+                       else if(startMins==30&&endMins==0)
                        {
                         endHr = endHr - 9;
                         endHr += endHr;
@@ -336,6 +322,11 @@ function insertEvent(accessToken, data, callback) {
                          busyArr1[j] = 1;
                          j++;
                         }
+                       }
+                       else
+                       {
+                           busyArr1[j] = 1;
+                           j++;
                        }
                     }
                   //console.log(busyArr1);
@@ -537,173 +528,13 @@ function freeBusyFunc(accessToken, data, callback) {
       .then(response => {
 
         console.log("Free Busy data")
+        console.log(response.data);
         callback(response.data);
       }).catch((error) => {
         console.log('Error occurred : '+error);
     });
 
   }
-
-const CalendarBasicHandler = {
-    canHandle(handlerInput) {
-        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-            && handlerInput.requestEnvelope.request.intent.name === 'CalendarBasic';
-    },
-    handle(handlerInput) {
-         var accessToken = handlerInput.requestEnvelope.context.System.user.accessToken;
-        // var result;
-    if (accessToken == undefined){
-        // The request did not include a token, so tell the user to link
-        // accounts and return a LinkAccount card
-        var speechText = "Your calendar account is not linked";        
-       
-        return handlerInput.responseBuilder
-            .speak(speechText)
-            .withLinkAccountCard()
-            .getResponse();
-    } 
-    else { 
-      return new Promise(resolve => {
-      getEvent(accessToken, res => {
-       //const slots = handlerInput.requestEnvelope.request.intent.slots;
-        
-      // console.log(slots.Time.value.toString());
-
-       var speechText = 'Your next event is ' ;
-       //for(var i=0;i<res.items.length;i++)
-       //{
-        var t = moment(res.items[0].start.dateTime).format("dddd, Do MMMM , h:mm:ss a"); 
-           speechText = speechText + res.items[0].summary+ " scheduled on " + t;
-       //}
-
-        resolve(
-          handlerInput.responseBuilder
-            .speak(speechText)
-            .reprompt(speechText)
-            .getResponse()
-        );
-      });
-    });                
-   }      
-  }
-};
-
-function getEvent(accessToken, callback) {
-console.log('hi');
-//console.log(moment().format("YYYY-MM-DDTHH:mm:ssZ"));
-var d = new Date();
-var time1 = ISODateString(d);
-//console.log(ISODateString(d)); // prints something like 2009-09-28T19:03:12Z
-console.log(time1);
-  const header = {
-    headers: {'Authorization': 'Bearer ' + accessToken }
-   // 'content-type': 'application/json'
-  };
-
-  axios
-    .get('https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=' + time1 + '&orderBy=startTime&singleEvents=true', header)
-    .then(response => {
-      console.log(response.data);                                   
-      console.log(response.data.items[0].summary);
-      console.log(response.data.items[0].creator.email);
-      console.log(response.data.items[0].start.dateTime);
-     // var d = JSON.parse(response.data.items[0].creator)
-      //console.log(d.email);
-      callback(response.data);
-    });
-}
-function ISODateString(d){
- function pad(n){return n<10 ? '0'+n : n}
- return d.getUTCFullYear()+'-'
-      + pad(d.getUTCMonth()+1)+'-'
-      + pad(d.getUTCDate())+'T'
-      + pad(d.getUTCHours())+':'
-      + pad(d.getUTCMinutes())+':'
-      + pad(d.getUTCSeconds())+'Z'}
-
-const CalendarSlotQueryHandler = {
-    canHandle(handlerInput) {
-        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-            && handlerInput.requestEnvelope.request.intent.name === 'CalendarSlotQuery';
-    },
-    handle(handlerInput) {
-         var accessToken = handlerInput.requestEnvelope.context.System.user.accessToken;
-        
-    if (accessToken == undefined){
-        // The request did not include a token, so tell the user to link
-        // accounts and return a LinkAccount card
-        var speechText = "Your calendar account is not linked";        
-       
-        return handlerInput.responseBuilder
-            .speak(speechText)
-            .withLinkAccountCard()
-            .getResponse();
-    } 
-    else { 
-       const slots = handlerInput.requestEnvelope.request.intent.slots;
-       const time = slots.EventTime.value.toString();
-       const date = slots.EventDate.value.toString();
-        
-       console.log(time);
-       console.log(date);
-      
-      return new Promise(resolve => {
-      getEvents(accessToken, time, date, res => {
-
-        var speechText = 'You have ' ;
-      
-        if(res.items[0] === undefined){
-          speechText = speechText + "nothing scheduled for that time."
-        }
-        else{
-        var t = moment(res.items[0].start.dateTime).format("dddd, Do MMMM , h:mm:ss a"); 
-           speechText = speechText + res.items[0].summary+ " scheduled on " + t;
-       }
-
-        resolve(
-          handlerInput.responseBuilder
-            .speak(speechText)
-            .reprompt(speechText)
-            .getResponse()
-        );
-      });
-    });                
-   }      
-  }
-};
-
-function getEvents(accessToken, time, date, callback) {
-console.log('hi');
-
-const istTime = date + " " +time;
-console.log(istTime);
-const durationInMinutes = '330';
-
-const utcTime = moment(istTime, 'YYYY-MM-DD HH:mm').subtract(durationInMinutes, 'minutes').format('YYYY-MM-DD HH:mm');
-console.log(utcTime);
-var time2 = utcTime.slice(0, 10) + "T" + utcTime.slice(11) + ":00Z";
-console.log(time2);
-
-var time3 = utcTime.slice(0, 10) + "T" + utcTime.slice(11) + ":30Z";
-//console.log(ISODateString(d)); // prints something like 2009-09-28T19:03:12Z
-//console.log(time1);
-  const header = {
-    headers: {'Authorization': 'Bearer ' + accessToken }
-   // 'content-type': 'application/json'
-  };
-
-  axios
-    .get('https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=' + time2 + '&timeMax=' + time3 + '&orderBy=startTime&singleEvents=true', header)
-    .then(response => {
-      console.log(response.data);                                   
-     // console.log(response.data.items[0].summary);
-      //onsole.log(response.data.items[0].creator.email);
-      //console.log(response.data.items[0].start.dateTime);
-     // var d = JSON.parse(response.data.items[0].creator)
-      //console.log(d.email);
-      callback(response.data);
-    });
-}
 
 const CalendarQueryHandler = {
     canHandle(handlerInput) {
@@ -729,17 +560,22 @@ const CalendarQueryHandler = {
         const time = slots.EventTime.value.toString();
         const date = slots.EventDate.value.toString();
 
-        console.log(slots.FirstName.value.toString());
-     //   console.log(slots.FirstName.id.toString());
-        //console.log(slots.LastName.value.toString());
-
-        //var email = slots.FirstName.value.toString()+"."+slots.LastName.value.toString()+"@cumminscollege.in";
-     var email = handlerInput.requestEnvelope.request.intent.slots.FirstName.resolutions.resolutionsPerAuthority[0].values[0].value.id;
+        var email;
+        var speechText ;
+        if(slots.FirstName.value==undefined)
+        {
+            email = 'primary';
+            speechText = 'You have ' ;
+        }
+       else{
+        email = handlerInput.requestEnvelope.request.intent.slots.FirstName.resolutions.resolutionsPerAuthority[0].values[0].value.id;
+        speechText = slots.FirstName.value.toString() + ' has ' ;
+       }   
       console.log(email);
       return new Promise(resolve => {
       query(accessToken, email, time, date, res => {
         
-       var speechText = slots.FirstName.value.toString() + ' has ' ;
+      
       
         if(res.items[0] === undefined){
           speechText = speechText + "nothing scheduled for that time."
@@ -774,6 +610,7 @@ console.log(time2);
 
 var time3 = utcTime.slice(0, 10) + "T" + utcTime.slice(11) + ":30Z";
 
+console.log(email);
   const header = {
     headers: {'Authorization': 'Bearer ' + accessToken }
     };
@@ -839,11 +676,8 @@ return handlerInput.responseBuilder
 
 exports.handler = Alexa.SkillBuilders.custom()
      .addRequestHandlers(LaunchRequestHandler,
-                         HelloWorldIntentHandler,
                          CalendarCreateHandler,
                          CalendarFreeBusyHandler,
-                         CalendarBasicHandler,
-                         CalendarSlotQueryHandler,
                          CalendarQueryHandler,
                          HelpIntentHandler,
                          CancelAndStopIntentHandler,
