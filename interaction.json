@@ -141,6 +141,41 @@
                         "is {FirstName} free at {EventTime} {EventDate}",
                         "what does {FirstName} have at {EventTime} {EventDate}"
                     ]
+                },
+                {
+                    "name": "AddRule",
+                    "slots": [
+                        {
+                            "name": "PreferredState",
+                            "type": "PreferredState"
+                        },
+                        {
+                            "name": "EventDay",
+                            "type": "AMAZON.DayOfWeek"
+                        },
+                        {
+                            "name": "DayTime",
+                            "type": "DayTime"
+                        },
+                        {
+                            "name": "State",
+                            "type": "State"
+                        },
+                        {
+                            "name": "Topic",
+                            "type": "Topic"
+                        },
+                        {
+                            "name": "Organizer",
+                            "type": "FirstName"
+                        }
+                    ],
+                    "samples": [
+                        "{State} meetings {EventDay}",
+                        "{State} meetings with {Organizer}",
+                        "{State} {Topic} meetings",
+                        "{PreferredState} meetings on {EventDay} {DayTime}"
+                    ]
                 }
             ],
             "types": [
@@ -218,6 +253,95 @@
                             "id": "saumeya.katyal@cumminscollege.in",
                             "name": {
                                 "value": "saumeya"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "DayTime",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "evening",
+                                "synonyms": [
+                                    "in the evening"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "morning",
+                                "synonyms": [
+                                    "in the morning"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "afternoon",
+                                "synonyms": [
+                                    "midday",
+                                    "in the afternoon"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Topic",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "review"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "project"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "design"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "State",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "reject",
+                                "synonyms": [
+                                    "don't attend",
+                                    "don't accept",
+                                    "deny",
+                                    "refuse"
+                                ]
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "accept",
+                                "synonyms": [
+                                    "always attend",
+                                    "always accept",
+                                    "affirm"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "PreferredState",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "avoid",
+                                "synonyms": [
+                                    "ignore"
+                                ]
                             }
                         }
                     ]

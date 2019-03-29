@@ -3,6 +3,20 @@ const Alexa = require('ask-sdk-core');
 const Request = require('request-promise');
 const axios = require('axios');
 const moment = require('moment');
+const AWS = require('aws-sdk');
+const uuid = require('uuid');
+
+var config = {
+    "apiVersion": "latest",
+    "accessKeyId": "fakeMyKeyId",
+    "secretAccessKey": "fakeSecretAccessKey",
+    "region":"Asia Pacific(Mumbai)",
+    "endpoint": "http://localhost:8000"
+  }
+  var dynamodb = new AWS.DynamoDB(config);
+  
+  AWS.config.update(config);
+  let docClient = new AWS.DynamoDB.DocumentClient();
 
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
@@ -59,6 +73,7 @@ const CalendarCreateHandler = {
             }
             console.log(names);
         const data = {
+            "sendUpdates":true,
             "end": {
               "dateTime": eventDate+"T"+endTime+":00+05:30"
             },
@@ -624,6 +639,71 @@ console.log(email);
     });
 }
 
+const AddRuleHandler = {
+    canHandle(handlerInput) {
+        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+            && handlerInput.requestEnvelope.request.intent.name === 'AddRule';
+    },
+    handle(handlerInput) {
+         
+      return new Promise(resolve => {
+      
+        const slots = handlerInput.requestEnvelope.request.intent.slots;
+  
+        var input={};
+        input["KeyName"] = uuid.v4();
+        for(var slotKey in slots)
+        {
+          //console.log(slotKey);
+         // console.log(slotKey.value);
+          if(slots[slotKey].value == undefined)
+          {
+            continue;
+          }
+          else
+          {
+  
+            var key = slotKey;
+            var value;
+            if(key.includes('Organizer'))
+            {
+                value = slots[slotKey].resolutions.resolutionsPerAuthority[0].values[0].value.id.toString();
+            }
+            else{
+              value = slots[slotKey].value;
+            }
+            
+            input[key] = value;
+          }
+        }
+        input["Id"] = "krutika.sarode@cumminscollege.in";
+      console.log(input);
+  
+   var params = {
+       TableName: "CalRulesStored",
+       Item:  input
+   };
+   docClient.put(params, function (err, data) {
+  
+       if (err) {
+           console.log("users::save::error - " + JSON.stringify(err, null, 2));                      
+       } else {
+           console.log("users::save::success" );                      
+       }
+   });
+      var speechText = "Hello";
+        resolve(
+          handlerInput.responseBuilder
+            .withShouldEndSession(true)
+            .speak(speechText)
+            .reprompt(speechText)
+            .getResponse()
+        );
+      });    
+  }
+  };
+
+
 const HelpIntentHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -679,6 +759,7 @@ exports.handler = Alexa.SkillBuilders.custom()
                          CalendarCreateHandler,
                          CalendarFreeBusyHandler,
                          CalendarQueryHandler,
+                         AddRuleHandler,
                          HelpIntentHandler,
                          CancelAndStopIntentHandler,
                          SessionEndedRequestHandler)
