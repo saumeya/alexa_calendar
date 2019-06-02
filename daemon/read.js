@@ -6,7 +6,7 @@ const axios = require('axios');
   var config = {
     "region": "us-east-1",
     "endpoint": "http://dynamodb.us-east-1.amazonaws.com",
-    "accessKeyId": "AKIAVMHJ4Y6S7ZAUNLTL", "secretAccessKey": "/4LJ8IpJliB7L1kPCqU1LAS4GdWJBDJ0IXoBjOiY"
+    "accessKeyId": "AKIAVMHJ4YXXXXXXXXXX", "secretAccessKey": "/4LJ8IpJliB7L1kPXXXXXXXXXXXXXXXXXXXXXXX" //your access key
 };
   var dynamodb = new AWS.DynamoDB(config);
 
