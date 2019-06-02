@@ -1,13 +1,24 @@
 const fs = require('fs');
 const readline = require('readline');
 const {google} = require('googleapis');
-const axios = require('axios');
-var extraction = require("./extract.js");
-var http = require('http');
-//const PORT=80;
-var result;
-var MyApp = {};
 
+var extraction = require("./extract.js");
+
+var MyApp = {};
+var AWS = require("aws-sdk");
+
+var config = {
+    "apiVersion": "latest",
+    "accessKeyId": "fakeMyKeyId",
+    "secretAccessKey": "fakeSecretAccessKey",
+    "region":"Asia Pacific(Mumbai)",
+    "endpoint": "http://localhost:8000"
+  }
+  var dynamodb = new AWS.DynamoDB(config);
+
+  AWS.config.update(config);
+
+let docClient = new AWS.DynamoDB.DocumentClient();
 const uuidv1 = require('uuid/v1');
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/calendar'];
@@ -74,101 +85,91 @@ function getAccessToken(oAuth2Client, callback) {
 }
 
 /**
- * Lists the next 10 events on the user's primary calendar.
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 function listEvents(auth) {
   const calendar = google.calendar({version: 'v3', auth});
- MyApp.auth1 = auth;
-  calendar.events.list({
-    calendarId: 'roshani.aher@cumminscollege.in',
-    timeMin: (new Date()).toISOString(),   
-  }, (err, res) => {
-    if (err) return console.log('The API returned an error: ' + err);
-    const events = res.data.items;
-    console.log(res.data.nextSyncToken);
-    MyApp.sync_tokenR = res.data.nextSyncToken;
+  MyApp.auth1 = auth;
 
-    // if (events.length) {
-    //   console.log('Upcoming 10 events:');
-    //   events.map((event, i) => {
-    //     const start = event.start.dateTime || event.start.date;
-    //     console.log(`${start} - ${event.summary}`);
-    //   });     
-    // } else {
-    //   console.log('No upcoming events found.');
-    // }
-  });
-   calendar.events.list({
-    calendarId: 'saumeya.katyal@cumminscollege.in',
+ var emails = ['krutika.sarode@cumminscollege.in','saumeya.katyal@cumminscollege.in','priya.andurkar@cumminscollege.in','roshani.aher@cumminscollege.in'];
+
+for(var i = 0; i<emails.length; i++){
+   
+ calendar.events.list({
+    calendarId: emails[i],
     timeMin: (new Date()).toISOString(),   
   }, (err, res) => {
+    
     if (err) return console.log('The API returned an error: ' + err);
     const events = res.data.items;
-    console.log(res.data.nextSyncToken);
+  
     MyApp.sync_tokenS = res.data.nextSyncToken;
-});
-    calendar.events.list({
-    calendarId: 'priya.andurkar@cumminscollege.in',
-    timeMin: (new Date()).toISOString(),   
-  }, (err, res) => {
-    if (err) return console.log('The API returned an error: ' + err);
-    const events = res.data.items;
-    console.log(res.data.nextSyncToken);
-    MyApp.sync_tokenP = res.data.nextSyncToken;
-});
+    var params = {
+        TableName:"SyncToken",
+        Item:{
+            "Id": res.data.summary,
+      "token":res.data.nextSyncToken 
+    
+        }
+    };
+     
+    docClient.put(params, function(err, data) {
+        if (err) {
+            console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+        } else {
+            console.log("Added sync token:", JSON.stringify(data, null, 2));
+        }
+    });
+ });
+}
+
 }
 
 module.exports = {
- synchronize: function(){
- // function synchronize(){
+  synchronize: function(user){ 
   var auth = MyApp.auth1;
   const calendar = google.calendar({version: 'v3', auth});
- 
-  calendar.events.list({
-    calendarId: 'primary',
-    syncToken: MyApp.sync_tokenS,   
-  }, (err, res) => {
-    if (err) return console.log('The API 1 returned an error: ' + err);
-    const events = res.data.items;    
-    console.log(res.data);
+    
+  var params = {
+    TableName: "SyncToken"
+        };
 
-    MyApp.sync_tokenS = res.data.nextSyncToken;
-    extraction.add(auth, calendar, res.data);
-  });
- },
- synchronizeR: function(){
- // function synchronize(){
-  var auth = MyApp.auth1;
-  const calendar = google.calendar({version: 'v3', auth});
- 
-  calendar.events.list({
-    calendarId: 'roshani.aher@cumminscollege.in',
-    syncToken: MyApp.sync_tokenR,   
-  }, (err, res) => {
-    if (err) return console.log('The API 2 returned an error: ' + err);
-    const events = res.data.items;    
-    console.log(res.data);
-        
-    MyApp.sync_tokenR = res.data.nextSyncToken;
-    extraction.add(auth, calendar, res.data);
-  });
- },
-  synchronizeR: function(){
- // function synchronize(){
-  var auth = MyApp.auth1;
-  const calendar = google.calendar({version: 'v3', auth});
- 
-  calendar.events.list({
-    calendarId: 'roshani.aher@cumminscollege.in',
-    syncToken: MyApp.sync_tokenP,   
-  }, (err, res) => {
-    if (err) return console.log('The API 2 returned an error: ' + err);
-    const events = res.data.items;    
-    console.log(res.data);
-        
-    MyApp.sync_tokenP = res.data.nextSyncToken;
-    extraction.add(auth, calendar, res.data);
-  });
+  docClient.scan(params, function(err, data) {
+        if (err) {
+            console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+        } else {
+           
+            for(var i=0;i<data.Count;i++){
+                if(data.Items[i].Id==user){
+                    var token=data.Items[i].token;
+
+                     calendar.events.list({
+                        calendarId: user,                       
+                       syncToken: token,   
+                      }, (err, res) => {
+                        if (err) return console.log('synchronize returned an error: ' + err);    
+                       
+                       token = res.data.nextSyncToken;
+                       
+                        var params={
+                          TableName: "SyncToken",
+                          Item:{
+                           "Id": user,
+                          "token":token    
+                          }
+                        };
+                        docClient.put(params, function(err, data) {
+                        if (err) {
+                        console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+                        } else {
+                         console.log("New Sync token added:", JSON.stringify(data, null, 2));
+                        }
+                     }); //updating sync token                       
+                      extraction.add(res.data);
+                 });//cal list
+                }               
+            }
+        }
+    });
  },
 };

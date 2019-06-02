@@ -3,11 +3,8 @@ const readline = require('readline');
 const {google} = require('googleapis');
 const axios = require('axios');
 var extraction = require("./extract.js");
-var http = require('http');
-//const PORT=80;
-var result;
-var MyApp = {};
 
+var MyApp = {};
 const uuidv1 = require('uuid/v1');
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/calendar'];
@@ -15,6 +12,20 @@ const SCOPES = ['https://www.googleapis.com/auth/calendar'];
 // created automatically when the authorization flow completes for the first
 // time.
 const TOKEN_PATH = 'token.json';
+var AWS = require("aws-sdk");
+
+var config = {
+    "apiVersion": "latest",
+    "accessKeyId": "fakeMyKeyId",
+    "secretAccessKey": "fakeSecretAccessKey",
+    "region":"Asia Pacific(Mumbai)",
+    "endpoint": "http://localhost:8000"
+  }
+  var dynamodb = new AWS.DynamoDB(config);
+
+  AWS.config.update(config);
+
+let docClient = new AWS.DynamoDB.DocumentClient();
 
 // Load client secrets from a local file.
 fs.readFile('credentials.json', (err, content) => {
@@ -78,44 +89,28 @@ function getAccessToken(oAuth2Client, callback) {
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 function listEvents(auth) {
-  const calendar = google.calendar({version: 'v3', auth});
- 
-  calendar.events.list({
-    calendarId: 'roshani.aher@cumminscollege.in',
-    timeMin: (new Date()).toISOString(),   
-  }, (err, res) => {
-    if (err) return console.log('The API returned an error: ' + err);
-    const events = res.data.items;
-    console.log(res.data.nextSyncToken);
-
-    MyApp.sync_token = res.data.nextSyncToken;
-
-    if (events.length) {
-      console.log('Upcoming 10 events:');
-      events.map((event, i) => {
-        const start = event.start.dateTime || event.start.date;
-        console.log(`${start} - ${event.summary}`);
-      });     
-    } else {
-      console.log('No upcoming events found.');
-    }
-  });
   
+  const calendar = google.calendar({version: 'v3', auth});
+  var emails = ['krutika.sarode@cumminscollege.in','saumeya.katyal@cumminscollege.in','priya.andurkar@cumminscollege.in','roshani.aher@cumminscollege.in'];
+
+
+for(var i = 0; i<emails.length; i++){
 var channel = {
   id: uuidv1(),
   type: "web_hook",
-  address: "https://3949a658.ngrok.io/",
-  token: "target=myApp-roshani"
+  address: "https://f383a31c.ngrok.io/",
+  token: emails[i]
 }
 calendar.events.watch({
   auth: auth,
-  calendarId: 'roshani.aher@cumminscollege.in',
+  calendarId: emails[i],
   resource: channel
 }, function(err, res) {
      if (err) {
      console.log('Error ' + err);
      return;
    }
-   console.log('Result ', + res);
- });
+   console.log('Watch Started for ', + res);
+   });
+  }
 }
