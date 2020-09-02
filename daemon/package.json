@@ -13,7 +13,7 @@
     "axios": "^0.18.0",
     "date-and-time": "^0.6.3",
     "express": "^4.16.4",
-    "googleapis": "^27.0.0",
+    "googleapis": "^39.1.0",
     "readline-sync": "^1.4.9",
     "uuid": "^3.3.2"
   }
